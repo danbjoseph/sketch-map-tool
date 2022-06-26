@@ -6,3 +6,4 @@ matplotlib==3.5.1
 numpy==1.22.3
 pandas==1.4.1
 reportlab==3.6.9
+pytest==7.1.2
