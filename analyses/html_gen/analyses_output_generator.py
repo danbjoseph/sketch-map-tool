@@ -7,6 +7,10 @@ from analyses.helpers import AnalysisResult, QualityLevel
 from helper_modules.bbox_utils import Bbox
 import json
 
+KEY_VERY_IMPORTANT = "very important"
+KEY_IMPORTANT = "important"
+KEY_LESS_IMPORTANT = "less important"
+
 
 def get_general_score(results: List[AnalysisResult]) -> QualityLevel:
     """
@@ -30,35 +34,36 @@ def get_result_texts(results: List[AnalysisResult]) \
     """
     Get result texts based on analyses results to be added to result pages.
 
-    :param results: Results based on which the texts will be created
+    :param results: Results based on which the texts will be created. Top-level keys are the
+                    quality levels, secondary level keys are the importances
     :return: Messages for the different levels and importances, suggestions
     """
     suggestions = []
     messages: Dict[QualityLevel, Dict[str, List[str]]] = {
         QualityLevel.RED: {
-            "very important": [],
-            "important": [],
-            "less important": []
+            KEY_VERY_IMPORTANT: [],
+            KEY_IMPORTANT: [],
+            KEY_LESS_IMPORTANT: []
         },
         QualityLevel.YELLOW: {
-            "very important": [],
-            "important": [],
-            "less important": []
+            KEY_VERY_IMPORTANT: [],
+            KEY_IMPORTANT: [],
+            KEY_LESS_IMPORTANT: []
         },
         QualityLevel.GREEN: {
-            "very important": [],
-            "important": [],
-            "less important": []
+            KEY_VERY_IMPORTANT: [],
+            KEY_IMPORTANT: [],
+            KEY_LESS_IMPORTANT: []
         }
     }
     for result in results:
         if result.suggestion != "":
             suggestions.append(result.suggestion)
-        importance = "important"
+        importance = KEY_IMPORTANT
         if result.importance < 1:
-            importance = "less important"
+            importance = KEY_LESS_IMPORTANT
         elif result.importance >= 1.5:
-            importance = "very important"
+            importance = KEY_VERY_IMPORTANT
         messages[result.level][importance].append(result.message)
     return messages, suggestions
 
