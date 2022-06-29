@@ -64,10 +64,14 @@ class CurrentnessAnalysis(Analysis):
         Create a pie plot showing the shares of features in a df with their value for the column
         'TimeDelta' in different ranges
 
-        :param df: Dataframe containing a column 'TimeDelta' indicating how old the features are
+        :param df: Dataframe containing a column 'TimeDelta' indicating how old the features are in
+                   days. Should only contain the features to be considered in the plot, i.e.
+                   duplicates etc. should be removed beforehand
         """
         if "TimeDelta" not in df.keys():
             raise ValueError("'df' must contain a column 'TimeDelta' indicating the features' age")
+        if len(df) == 0:
+            return
         # Categorize features by their age in years
         nr_1y = len(df[df["TimeDelta"] <= 365.25])
         nr_2y = len(df[(df["TimeDelta"] > 365.25) & (df["TimeDelta"] <= 2 * 365.25)])
