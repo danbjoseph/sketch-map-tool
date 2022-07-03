@@ -1,15 +1,15 @@
 """
 Test analysis_currentness.py
-To accelerate the tests and avoid traffic on ohsome, mocks are used for all requests to the API
+To accelerate the tests and avoid traffic on ohsome, mocks are used for all requests to the ohsome
+API
 """
 
 from analyses.modules import analysis_currentness
+from test.analyses.constants import TEST_LOCATION_PLOTS, TEST_DATA_PATH
 import pandas as pd
 import os
 import filecmp
 
-TEST_LOCATION_PLOTS = "test/analyses/test_output/plots/"
-TEST_DATA_PATH = "test/analyses/test_data/"
 
 test_data_plot_results = [
     # 2. Multiple features, one in each category
@@ -25,6 +25,8 @@ test_data_run = [
     # 0. No key specified
     # 1. Key specified
 ]
+
+# TODO: Test init
 
 
 def test_plot_location():
@@ -60,7 +62,7 @@ def test_plot_results_one_feature():
     assert len(os.listdir(TEST_LOCATION_PLOTS)) == 0
     features = pd.DataFrame(columns=["TimeDelta"])
     features.loc[0] = [2*365.25]
-    expected_plot_path = TEST_DATA_PATH+"plots/expected/plot_results_one_feature.png"
+    expected_plot_path = TEST_DATA_PATH+"plots/expected/currentness/plot_results_one_feature.png"
     actual_plot_path = TEST_LOCATION_PLOTS+"_plot_last_edit_general.png"
     currentness_analyses = analysis_currentness.CurrentnessAnalysis([], TEST_LOCATION_PLOTS)
     currentness_analyses.plot_results(features)
