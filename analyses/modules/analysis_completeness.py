@@ -94,7 +94,7 @@ class CompletenessAnalysis(Analysis):
         Send a request with a given aggregation and parameters to the Ohsome API
 
         :param aggregation: Aggregation to be requested from Ohsome (added to the URL)
-                            E.g.: 'length'
+                            E.g.: 'length', 'density'
         :param params: Parameters to be added to the Ohsome request
                        E.g.: bboxes='1.23,2.34,3.45,4.56', time='2014-01-01/2017-01-01/P1Y',
                        filter='amenity=* and (type:node or type:way)'
@@ -158,7 +158,8 @@ class CompletenessAnalysis(Analysis):
                                            filter="type:node or type:way").json()
 
         values = [data_point["value"] for data_point in ohsome_response["result"]]
-
+        if len(values) == 0:
+            raise ValueError("No values present")
         slopes = [0]
         for i in range(1, len(values)):
             if values[i - 1] > 0:
