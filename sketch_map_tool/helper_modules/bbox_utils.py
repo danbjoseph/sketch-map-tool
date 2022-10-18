@@ -3,9 +3,10 @@ Functions and classes to support work with bounding boxes and coordinates
 """
 
 import re
+from enum import Enum
 from math import asin, cos, pi, sin, sqrt
 from typing import Dict, Tuple
-from enum import Enum
+
 from pyproj import Transformer
 
 
@@ -19,6 +20,9 @@ class BboxTooLargeException(Exception):
 
 
 class Projection(Enum):
+    """
+    Identifier for coordinate systems
+    """
     WGS_84 = "WGS 84"
     WEB_MERCATOR = "Web Mercator"
 
@@ -35,7 +39,9 @@ class Bbox(object):
         self.lat2 = lat2
 
     @classmethod
-    def bbox_from_str(cls, bbox_str: str, projection: Projection = Projection.WGS_84) -> "Bbox":
+    def bbox_from_str(
+        cls, bbox_str: str, projection: Projection = Projection.WGS_84
+    ) -> "Bbox":
         """
         Get a Bbox object from a string containing comma separated values for the coordinates.
 
@@ -50,24 +56,28 @@ class Bbox(object):
                 "bounding box in the format 1.123,1.123,1.123,1.123"
             )
         if projection not in [Projection.WEB_MERCATOR, Projection.WGS_84]:
-            raise ValueError(f"Projection '{projection}' is currently not supported. Try 'Projection.WGS_84'.")
-        coordinates = bbox_str.split(",")
+            raise ValueError(
+                f"Projection '{projection}' is currently not supported. Try 'Projection.WGS_84'."
+            )
+        coordinates = [float(coordinate) for coordinate in bbox_str.split(",")]
 
         if projection == Projection.WEB_MERCATOR:
-            transformed_coordinates = 4*[0]
+            transformed_coordinates = 4 * [0.0]
             transformer = Transformer.from_crs("epsg:3857", "epsg:4326")
-            transformed_coordinates[1], transformed_coordinates[0] = transformer.transform(
-                float(coordinates[0]), float(coordinates[1])
-            )
-            transformed_coordinates[3], transformed_coordinates[2] = transformer.transform(
-                float(coordinates[2]), float(coordinates[3])
-            )
+            (
+                transformed_coordinates[1],
+                transformed_coordinates[0],
+            ) = transformer.transform(coordinates[0], coordinates[1])
+            (
+                transformed_coordinates[3],
+                transformed_coordinates[2],
+            ) = transformer.transform(coordinates[2], coordinates[3])
             coordinates = transformed_coordinates
         return Bbox(
-            float(coordinates[0]),
-            float(coordinates[1]),
-            float(coordinates[2]),
-            float(coordinates[3]),
+            coordinates[0],
+            coordinates[1],
+            coordinates[2],
+            coordinates[3],
         )
 
     def get_height(self) -> float:
@@ -126,7 +136,9 @@ class Bbox(object):
             "lat2": self.lat2,
         }
 
-    def get_str(self, mode: str = "minus", projection: Projection = Projection.WGS_84) -> str:
+    def get_str(
+        self, mode: str = "minus", projection: Projection = Projection.WGS_84
+    ) -> str:
         """
         Provide a string representation of the bounding box in a given mode.
 
@@ -140,22 +152,30 @@ class Bbox(object):
         '9.87,1.23,8.76,2.34'
         """
         if projection not in [Projection.WGS_84, Projection.WEB_MERCATOR]:
-            raise ValueError(f"Projection '{projection}' is currently not supported. Try 'Projection.WGS_84'.")
+            raise ValueError(
+                f"Projection '{projection}' is currently not supported. Try 'Projection.WGS_84'."
+            )
         coordinates = [self.lon1, self.lat1, self.lon2, self.lat2]
         if projection == Projection.WEB_MERCATOR:
-            transformed_coordinates = 4 * [0]
+            transformed_coordinates = 4 * [0.0]
             transformer = Transformer.from_crs("epsg:4326", "epsg:3857")
-            transformed_coordinates[0], transformed_coordinates[1] = transformer.transform(
-                coordinates[1], coordinates[0]
-            )
-            transformed_coordinates[2], transformed_coordinates[3] = transformer.transform(
-                coordinates[3], coordinates[2]
-            )
+            (
+                transformed_coordinates[0],
+                transformed_coordinates[1],
+            ) = transformer.transform(coordinates[1], coordinates[0])
+            (
+                transformed_coordinates[2],
+                transformed_coordinates[3],
+            ) = transformer.transform(coordinates[3], coordinates[2])
             coordinates = transformed_coordinates
         if mode == "minus":
-            return f"{coordinates[0]}-{coordinates[1]}-{coordinates[2]}-{coordinates[3]}".replace(".", "_")
+            return f"{coordinates[0]}-{coordinates[1]}-{coordinates[2]}-{coordinates[3]}".replace(
+                ".", "_"
+            )
         if mode == "comma":
-            return f"{coordinates[0]},{coordinates[1]},{coordinates[2]},{coordinates[3]}"
+            return (
+                f"{coordinates[0]},{coordinates[1]},{coordinates[2]},{coordinates[3]}"
+            )
         raise ValueError("'mode' needs to be either 'minus' or 'comma'")
 
     def __str__(self) -> str:
